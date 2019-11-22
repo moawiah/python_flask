@@ -1,6 +1,8 @@
-from flask import Flask, escape, request, render_template, url_for
+from flask import Flask, escape, request, render_template, url_for, flash, redirect
+from forms import RegistrationForm, LoginForm
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'b5f51bbfe46e889454386a9176644786'
 
 posts = [
     {
@@ -26,6 +28,24 @@ def home():
 def about():
     return render_template('about.html', title='ABOUT')
 
+@app.route('/register', methods=['GET','POST'])
+def register():
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        flash(f"Account Created For {form.username.data}!", 'success')
+        return redirect(url_for('home'))
+    return render_template('register.html', title='REGISTER', form=form)
+
+@app.route('/login', methods=['GET','POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        if form.email.data == "admin@test.com" and form.password.data == "password":
+            flash("You have been successfully logged in!", "success")
+            return redirect(url_for('home'))
+        else:
+            flash('Login Unsuccessful! Pleas check username and data!', 'danger')
+    return render_template('login.html', title='LOGIN', form=form)
 
 if __name__ == '__main__':
     app.run(debug=True)    
